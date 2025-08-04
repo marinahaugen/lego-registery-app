@@ -1,0 +1,51 @@
+---
+description: Frontend accessibility best practices using semantic HTML, ARIA, keyboard support, and WCAG compliance
+globs: 
+alwaysApply: false
+---
+# Accessibility Checklist
+
+## ✅ Must-Do
+- [ ] Use semantic HTML (header, nav, main, section, article, footer)
+- [ ] Add proper ARIA attributes (role, aria-label, aria-describedby)
+- [ ] Ensure keyboard navigation works (Tab, Enter, Space, Escape)
+- [ ] Provide alt text for images
+- [ ] Use proper heading hierarchy (h1 → h2 → h3)
+- [ ] Add labels to form inputs
+- [ ] Test with screen readers
+- [ ] Maintain WCAG AA color contrast (4.5:1 for normal text)
+- [ ] Add focus indicators
+- [ ] Use live regions for dynamic content
+- [ ] Provide skip links for main content
+
+## 🎯 Key Patterns
+```tsx
+// Form with proper labels
+<label htmlFor="email">Email</label>
+<input id="email" aria-describedby="email-error" />
+
+// Button with loading state
+<button aria-busy={isLoading} disabled={isLoading}>
+  {isLoading ? 'Loading...' : 'Submit'}
+</button>
+
+// Modal with proper attributes
+<div role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <h2 id="modal-title">Title</h2>
+</div>
+```
+
+## 🚫 Avoid
+- Color-only indicators (add icons/text)
+- Auto-playing media
+- Removing focus outlines
+- Using divs for buttons (use semantic elements)
+- Missing alt text on images
+- Poor color contrast
+- Mouse-only interactions
+
+## 🧪 Quick Test
+- [ ] Tab through all interactive elements
+- [ ] Check screen reader announces content correctly
+- [ ] Verify focus is visible
+- [ ] Test with high contrast mode

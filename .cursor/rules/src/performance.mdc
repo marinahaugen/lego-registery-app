@@ -1,0 +1,127 @@
+---
+description: Frontend Performance Guidelines
+globs: 
+alwaysApply: false
+---
+
+# Frontend Performance Guidelines
+
+## Performance Goals
+- **First Contentful Paint (FCP)**: < 1.8 s
+- **Largest Contentful Paint (LCP)**: < 2.5s
+- **Interaction to Next Paint (INP)**: < 100 ms  
+  *Note: INP replaced the older FID metric in March 2024; use it for measuring input responsiveness.*
+- **Cumulative Layout Shift (CLS)**: < 0.1
+- **Bundle size**: < 250 KB (gzipped)
+
+## React 19 - Key Updates and Recommendations
+React 19 introduces features that change how you optimize performance:
+
+- **Experimental React Compiler** - automatically optimizes components, so heavy use of `React.memo` and excessive `useMemo` calls is often unnecessary. Reserve manual memoization for truly expensive computations or when not using the compiler.
+- **Automatic batching & concurrent rendering** - React 19 batches state updates by default and improves scheduling via `useTransition`. Design your components assuming grouped state updates will be automatically batched.
+- **New data-mutation primitives** - `useActionState` and `useOptimistic` handle pending states, optimistic UI and error handling for mutations without extra libraries.
+- **Server Components and Directives** - Server Components reduce client bundle size by executing logic on the server. Use `'use client'` and `'use server'` directives to control where code runs.
+- **Resource Preloading APIs** - `prefetchDNS`, `preconnect`, `preload`, and `preinit` make it easy to preload scripts, styles, fonts and warm DNS connections to improve LCP and FCP.
+
+## React Performance Optimization
+
+### Component Optimization
+Use `React.memo` sparingly when relying on the React 19 compiler. Only memoize components that perform expensive calculations or re-render frequently.
+
+```tsx
+const ExpensiveComponent = React.memo(({ data, onUpdate }: Props) => {
+  return <div>{/* JSX */}</div>;
+});
+
+// When manual memoization is still needed for complex comparisons
+const UserList = React.memo(
+  ({ users, onUserClick }: UserListProps) => (
+    <ul>
+      {users.map((user) => (
+        <UserItem key={user.id} user={user} onClick={onUserClick} />
+      ))}
+    </ul>
+  ),
+  (prevProps, nextProps) =>
+    prevProps.users.length === nextProps.users.length &&
+    prevProps.users.every(
+      (user, index) => user.id === nextProps.users[index].id
+    )
+);
+```
+
+### Hook Optimization
+Use `useMemo` for expensive calculations only if they actually save work. Use `useCallback` to memoize functions that are passed to child components or event handlers.
+
+### State Optimization
+Prefer functional updates to avoid stale closures and `useReducer` for complex state logic. React 19's automatic batching will group state updates for you.
+
+### Code Splitting and Lazy Loading
+- Employ `React.lazy` and `Suspense` for route-based and component-level code splitting.
+- Use dynamic imports for conditional loading.
+
+### Bundle Optimization
+- Use named exports and tree-shaking to minimize bundle size.
+- Replace heavy dependencies (e.g., `moment`) with lighter alternatives like `date-fns`.
+
+### Image Optimization
+- Lazy-load images using the Intersection Observer API.
+- Use responsive `<picture>` elements to deliver different image sizes for various viewports.
+
+## Data Fetching and Optimistic Updates
+
+### Using React 19 Actions and Hooks
+Leverage `useActionState` and `useOptimistic` to handle form submissions and optimistic UI updates without needing third-party libraries:
+
+```tsx
+function ChangeName({ currentName, onUpdateName }) {
+  const [optimisticName, setOptimisticName] = useOptimistic(currentName);
+  const [error, submitAction, isPending] = useActionState(
+    async (_prev, formData) => {
+      const name = formData.get('name');
+      setOptimisticName(name);
+      const updatedName = await updateName(name);
+      onUpdateName(updatedName);
+      return null;
+    },
+    null
+  );
+  return (
+    <form action={submitAction}>
+      <p>Your name is: {optimisticName}</p>
+      <input type="text" name="name" disabled={isPending} />
+      <button type="submit" disabled={isPending}>Update</button>
+      {error && <p>{error}</p>}
+    </form>
+  );
+}
+```
+
+### SWR (Optional)
+When React's new mutation hooks are not suitable, you can still use SWR with optimistic updates; however, prefer built-in hooks for simpler workflows.
+
+## Performance Monitoring
+
+- Use the PerformanceObserver API to track LCP, INP, and CLS.
+- Create custom performance marks and measures for critical code paths.
+
+## Memory Management
+
+- Always clean up side effects in `useEffect` to avoid memory leaks.
+- Remove event listeners and cancel network requests on unmount.
+
+## Best Practices Checklist
+
+- [ ] Use the React 19 compiler when possible; avoid unnecessary `React.memo`
+- [ ] Use `useMemo` and `useCallback` only when they meaningfully reduce work
+- [ ] Split code via `React.lazy` and dynamic imports
+- [ ] Optimize bundle size with tree-shaking and lightweight dependencies
+- [ ] Implement lazy and responsive image loading
+- [ ] Prefer React 19's `useActionState` and `useOptimistic` for data mutations
+- [ ] Preload critical resources with `prefetchDNS`, `preconnect`, `preload`, and `preinit`
+- [ ] Monitor INP, LCP, FCP and CLS; use PerformanceObserver for real-time monitoring
+- [ ] Clean up event listeners and other side effects
+- [ ] Use performance marks to measure critical operations
+- [ ] Implement error boundaries and handle errors via React 19's new root options
+- [ ] Consider Server Components to reduce client bundle sizes
+- [ ] Test performance on slow devices and networks

@@ -1,0 +1,179 @@
+---
+description: Testing Guidelines
+globs: 
+alwaysApply: false
+---
+# Frontend Testing Guidelines
+
+## Testing Stack
+- **Vitest** for test runner and assertion library
+- **React Testing Library** for component testing
+- **@testing-library/jest-dom** for custom matchers
+
+## Test Structure & Naming
+
+### Test File Organization
+- Place test files alongside components: `ComponentName.test.tsx`
+- Use `describe()` blocks for grouping related tests
+- Use `it()` for individual test cases with descriptive names
+
+```tsx
+describe('UserProfile', () => {
+  it('displays user information when data is loaded', () => {
+    // test implementation
+  });
+
+  it('shows loading state while fetching data', () => {
+    // test implementation
+  });
+
+  it('displays error message when fetch fails', () => {
+    // test implementation
+  });
+});
+```
+
+## Component Testing Best Practices
+
+### Rendering & Queries
+- Use `render()` from React Testing Library
+- Prefer semantic queries: `getByRole`, `getByLabelText`, `getByText`
+- Avoid `getByTestId` unless necessary for complex interactions
+- Use `screen` object for queries when component is already rendered
+
+```tsx
+import { render, screen } from '@testing-library/react';
+
+test('renders user profile', () => {
+  render(<UserProfile user={mockUser} />);
+  
+  expect(screen.getByRole('heading', { name: /profile/i })).toBeInTheDocument();
+  expect(screen.getByText(mockUser.name)).toBeInTheDocument();
+});
+```
+
+### User Interactions
+- Use `userEvent` for simulating user interactions
+- Test user flows, not implementation details
+- Focus on accessibility and user experience
+
+```tsx
+import userEvent from '@testing-library/user-event';
+
+test('user can edit profile', async () => {
+  const user = userEvent.setup();
+  render(<UserProfile user={mockUser} />);
+  
+  const editButton = screen.getByRole('button', { name: /edit/i });
+  await user.click(editButton);
+  
+  expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
+});
+```
+
+## SWR Testing
+
+### Mocking SWR
+- Mock SWR responses for predictable testing
+- Test loading, error, and success states
+- Use `SWRConfig` for custom configurations in tests
+
+```tsx
+import { SWRConfig } from 'swr';
+
+const wrapper = ({ children }) => (
+  <SWRConfig value={{ 
+    provider: () => new Map(),
+    dedupingInterval: 0 
+  }}>
+    {children}
+  </SWRConfig>
+);
+
+test('displays user data from SWR', () => {
+  render(
+    <UserProfile userId="123" />,
+    { wrapper }
+  );
+  
+  // Test implementation
+});
+```
+
+## Error Boundary Testing
+
+### Testing Error States
+- Test error boundaries with error-throwing components
+- Verify error UI is displayed correctly
+- Test error recovery mechanisms
+
+```tsx
+test('displays error fallback when component throws', () => {
+  const ErrorComponent = () => {
+    throw new Error('Test error');
+  };
+
+  render(
+    <ErrorBoundary>
+      <ErrorComponent />
+    </ErrorBoundary>
+  );
+
+  expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+});
+```
+
+## Integration Testing
+
+### Testing with Real Data
+- Use MSW (Mock Service Worker) for API mocking
+- Test complete user workflows
+- Verify data flow between components
+
+### Testing Custom Hooks
+- Use `@testing-library/react-hooks` for hook testing
+- Test hook state changes and side effects
+- Mock dependencies when necessary
+
+## Test Utilities
+
+### Custom Render Function
+Create a custom render function with common providers:
+
+```tsx
+// test-utils.tsx
+import { render as rtlRender } from '@testing-library/react';
+import { SWRConfig } from 'swr';
+
+function render(ui, { swrOptions = {}, ...options } = {}) {
+  const Wrapper = ({ children }) => (
+    <SWRConfig value={{ 
+      provider: () => new Map(),
+      dedupingInterval: 0,
+      ...swrOptions 
+    }}>
+      {children}
+    </SWRConfig>
+  );
+
+  return rtlRender(ui, { wrapper: Wrapper, ...options });
+}
+
+export * from '@testing-library/react';
+export { render };
+```
+
+## Coverage & Quality
+
+### Coverage Targets
+- Aim for 80%+ code coverage
+- Focus on critical user paths
+- Test error scenarios and edge cases
+
+### Test Quality Checklist
+- [ ] Tests are readable and maintainable
+- [ ] Tests focus on user behavior, not implementation
+- [ ] Error states are properly tested
+- [ ] Loading states are verified
+- [ ] Accessibility is considered in tests
+- [ ] Tests are fast and reliable

@@ -1,0 +1,14 @@
+---
+description: Material UI Guidelines
+globs: 
+alwaysApply: false
+---
+# Material UI Guidelines
+
+- **Installation & setup:** install `@mui/material`, `@emotion/react` and `@emotion/styled`.
+- **Grid usage:** emphasise that the `Grid` component uses Flexbox, not CSS Grid, so you must specify the `container` prop for wrappersmui.com (https://mui.com/material-ui/react-grid/#:~:text=How%20it%20works). Grid items do not span rows and do not auto-place children; use CSS Grid or `Stack` when row spanning or auto-placement is requiredmui.com (https://mui.com/material-ui/react-grid/#:~:text=,recommend%20using%20CSS%20Grid%20instead).
+- **Breakpoints & sizing:** explain default breakpoints (`xs`, `sm`, `md`, `lg`, `xl`) and the `size` prop to control column spansmui.com (https://mui.com/material-ui/react-grid/#:~:text=relative%20to%20their%20parent%20element,recommend%20using%20CSS%20Grid%20instead); provide examples for responsive values.
+- **Theming:** advise creating a custom theme with `createTheme` and providing it through `ThemeProvider`.
+- **Common pitfalls:** emphasise checking MUI's official docs (v7) and not copying outdated examples; mention the migration from `GridLegacy` to the new `Grid` component.
+- **Accessibility:** follow MUI's accessibility guidelines and add `aria` labels where appropriate.
+

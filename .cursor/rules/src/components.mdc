@@ -1,0 +1,14 @@
+---
+description: Guidelines for React Comonents
+globs: 
+alwaysApply: false
+---
+## General:
+
+- Favor functional patterns over classes. 
+- Component structure: define props interfaces at the top; use named exports; avoid anonymous default exports.
+- Hooks: always prefix custom hooks with use. For data fetching, prefer SWR's useSWR with proper keys and revalidation; include loading and error states.
+- State management: if global state is needed, recommend lightweight libraries (e.g. Zustand) but avoid over-use of context.
+- File naming conventions: use kebab-case or PascalCase directories, consistent with your project's style.
+- Testing: encourage React Testing Library and Vitest integration.
+- Always use MUI components and styling system.

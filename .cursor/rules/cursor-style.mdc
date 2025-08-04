@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Project-Specific Guidelines
+
+## 👩🏽‍💻 Tech Stack
+- Deno 
+- TypeScript
+- React
+- MUI 
+- SWR
+- Vite 
+- Supabase
+
+## 📁 Project Structure
+
+```txt
+project-root/
+├── src/
+│   ├── features/
+│   │   ├── auth/                     # Login, register
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── pages/
+│   │   │   ├── services/            # e.g. Supabase auth calls
+│   │   │   └── schemas.ts           # Zod schemas + inferred types
+│   │   ├── collection/              # "Min samling"
+│   │   │   ├── components/
+│   │   │   ├── pages/
+│   │   │   ├── utils.ts
+│   │   │   └── types.ts
+│   │   ├── setDetails/              # "Legosett-detaljer"
+│   │   ├── buildableSets/           # "Settene du kan bygge"
+│   │   ├── partsInventory/          # "Mine brikker"
+│   │   └── shared/                  # Shared reusable components (e.g. Button, Card)
+│   ├── app/                         # Routing, app shell/layout
+│   ├── lib/                         # Non-feature-specific utils
+│   ├── styles/                      # Global styles
+│   ├── assets/                      # Images, icons
+│   └── main.tsx
+├── supabase/
+│   ├── functions/
+│   ├── migrations/
+│   ├── schemas/                     # SQL table definitions
+│   ├── rls-policies/
+│   └── config.toml
+```
+
+## 🏗️ Architecture Patterns
+
+- Use **SWR** for data fetching with React
+- Implement **Row Level Security (RLS)** policies in Supabase
+- Use **Edge Functions** for server-side logic
+- Follow **declarative database schema** patterns
+- Structure database migrations and functions according to Supabase conventions
+
+## 💡 General Principles
+
+- Prefer clear code over comments
+- Add comments only for:
+  - Non-obvious logic or business rules
+  - Known limitations or TODOs
+  - Workarounds or performance tricks
+- Use `JSDoc` on utilities or exported functions

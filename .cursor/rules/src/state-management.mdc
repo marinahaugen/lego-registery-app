@@ -1,0 +1,370 @@
+---
+description: Frontend State Management Guidelines
+globs: 
+alwaysApply: false
+---
+# Frontend State Management Guidelines
+
+## State Management Stack
+- **React useState/useReducer** for local component state
+- **Zustand** for global state management
+- **SWR** for server state and caching
+- **React Context** (sparingly) for theme/auth providers
+
+## State Hierarchy
+
+### 1. Local Component State
+- Use `useState` for simple component state
+- Use `useReducer` for complex state logic
+- Keep state as close to where it's used as possible
+
+```tsx
+// Simple local state
+function Counter() {
+  const [count, setCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+
+// Complex state with useReducer
+type State = {
+  count: number;
+  isLoading: boolean;
+  error: string | null;
+};
+
+type Action = 
+  | { type: 'INCREMENT' }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
+
+function counterReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { ...state, count: state.count + 1 };
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    default:
+      return state;
+  }
+}
+```
+
+### 2. Server State (SWR)
+- Use SWR for all API data fetching and caching
+- Keep server state separate from client state
+- Let SWR handle loading, error, and caching states
+
+```tsx
+// Server state with SWR
+function UserProfile({ userId }: { userId: string }) {
+  const { data: user, error, isLoading } = useSWR(
+    `/api/users/${userId}`,
+    fetcher
+  );
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading user</div>;
+  if (!user) return <div>No user found</div>;
+
+  return <div>{user.name}</div>;
+}
+```
+
+### 3. Global Client State (Zustand)
+- Use Zustand for state that needs to be shared across components
+- Keep stores focused and minimal
+- Prefer composition over large monolithic stores
+
+## Zustand Best Practices
+
+### Store Structure
+```tsx
+// userStore.ts
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface UserState {
+  // State
+  user: User | null;
+  isAuthenticated: boolean;
+  
+  // Actions
+  setUser: (user: User | null) => void;
+  logout: () => void;
+  updateProfile: (updates: Partial<User>) => void;
+}
+
+export const useUserStore = create<UserState>()(
+  devtools(
+    (set, get) => ({
+      // Initial state
+      user: null,
+      isAuthenticated: false,
+      
+      // Actions
+      setUser: (user) => set(
+        { user, isAuthenticated: !!user },
+        false,
+        'user/setUser'
+      ),
+      
+      logout: () => set(
+        { user: null, isAuthenticated: false },
+        false,
+        'user/logout'
+      ),
+      
+      updateProfile: (updates) => set(
+        (state) => ({
+          user: state.user ? { ...state.user, ...updates } : null
+        }),
+        false,
+        'user/updateProfile'
+      ),
+    }),
+    { name: 'user-store' }
+  )
+);
+```
+
+### Store Composition
+```tsx
+// Multiple focused stores
+// authStore.ts
+export const useAuthStore = create<AuthState>()(
+  devtools((set) => ({
+    token: null,
+    setToken: (token) => set({ token }),
+    clearToken: () => set({ token: null }),
+  }))
+);
+
+// uiStore.ts
+export const useUIStore = create<UIState>()(
+  devtools((set) => ({
+    sidebarOpen: false,
+    toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  }))
+);
+
+// Combined usage
+function App() {
+  const { token } = useAuthStore();
+  const { sidebarOpen, toggleSidebar } = useUIStore();
+  
+  return (
+    <div>
+      {token && <button onClick={toggleSidebar}>Toggle Sidebar</button>}
+      {sidebarOpen && <Sidebar />}
+    </div>
+  );
+}
+```
+
+### Async Actions
+```tsx
+// Async actions with Zustand
+interface UserStore {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  fetchUser: (id: string) => Promise<void>;
+}
+
+export const useUserStore = create<UserStore>()(
+  devtools(
+    (set, get) => ({
+      user: null,
+      isLoading: false,
+      error: null,
+      
+      fetchUser: async (id: string) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          const response = await fetch(`/api/users/${id}`);
+          const user = await response.json();
+          set({ user, isLoading: false });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isLoading: false 
+          });
+        }
+      },
+    }),
+    { name: 'user-store' }
+  )
+);
+```
+
+## React Context (Limited Use)
+
+### When to Use Context
+- Theme providers (light/dark mode)
+- Authentication context (user session)
+- Internationalization (i18n)
+- Avoid for general state management
+
+```tsx
+// Theme context example
+interface ThemeContextType {
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }, []);
+  
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
+```
+
+## State Organization Patterns
+
+### 1. Feature-Based Organization
+```
+src/
+├── features/
+│   ├── auth/
+│   │   ├── stores/
+│   │   │   └── authStore.ts
+│   │   ├── components/
+│   │   └── hooks/
+│   └── users/
+│       ├── stores/
+│       │   └── userStore.ts
+│       ├── components/
+│       └── hooks/
+```
+
+### 2. Store Composition
+```tsx
+// Combine stores when needed
+export const useAppStore = create<AppState>()(
+  devtools(
+    (set, get) => ({
+      ...useAuthStore(set, get),
+      ...useUIStore(set, get),
+      ...useUserStore(set, get),
+    }),
+    { name: 'app-store' }
+  )
+);
+```
+
+## Performance Optimization
+
+### Selective Subscriptions
+```tsx
+// Subscribe only to needed state
+function UserName() {
+  // Only re-renders when user.name changes
+  const userName = useUserStore(state => state.user?.name);
+  return <span>{userName}</span>;
+}
+
+function UserEmail() {
+  // Only re-renders when user.email changes
+  const userEmail = useUserStore(state => state.user?.email);
+  return <span>{userEmail}</span>;
+}
+```
+
+### Memoization
+```tsx
+// Memoize selectors for complex computations
+const selectUserFullName = (state: UserState) => {
+  const { user } = state;
+  return user ? `${user.firstName} ${user.lastName}` : '';
+};
+
+function UserFullName() {
+  const fullName = useUserStore(selectUserFullName);
+  return <span>{fullName}</span>;
+}
+```
+
+## State Persistence
+
+### Local Storage
+```tsx
+import { persist } from 'zustand/middleware';
+
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+    }),
+    {
+      name: 'user-storage',
+      partialize: (state) => ({ user: state.user }), // Only persist user
+    }
+  )
+);
+```
+
+### Session Storage
+```tsx
+export const useUIStore = create<UIState>()(
+  persist(
+    (set) => ({
+      sidebarOpen: false,
+      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+    }),
+    {
+      name: 'ui-storage',
+      storage: sessionStorage, // Use session storage
+    }
+  )
+);
+```
+
+## Best Practices Checklist
+
+- [ ] Use local state for component-specific data
+- [ ] Use SWR for server state and caching
+- [ ] Use Zustand for global client state
+- [ ] Keep stores focused and minimal
+- [ ] Prefer composition over large stores
+- [ ] Use selective subscriptions for performance
+- [ ] Memoize complex selectors
+- [ ] Add devtools for debugging
+- [ ] Use TypeScript for type safety
+- [ ] Persist only necessary state
+- [ ] Avoid prop drilling with global state
+- [ ] Keep state as close to usage as possible

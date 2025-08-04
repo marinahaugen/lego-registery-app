@@ -1,0 +1,30 @@
+---
+description: Guidelines for TypeScript usage
+globs: 
+alwaysApply: false
+---
+# TypeScript Guidelines
+
+## Type Safety
+- Write clean, minimal TypeScript
+- Avoid `any`; use `unknown` if needed
+- Always type function return values
+- Use proper type annotations for function parameters and return types
+- Leverage TypeScript's type inference where appropriate
+
+## React + TypeScript
+- Use proper typing for React components and props
+- Define interfaces for component props
+- Use generic types for reusable components
+- Use generics with SWR (e.g., `useSWR<User[]>(…)`)
+- Leverage TypeScript's built-in React types
+
+## Code Patterns
+- Use interfaces over type aliases for objects
+- Avoid enums; use union literals instead
+- Use type guards for runtime type checking
+- Use const assertions for immutable data
+- Leverage utility types (Pick, Omit, Partial, etc.)
+
+## File Conventions
+- Use `.ts` for utilities and `.tsx` for React components

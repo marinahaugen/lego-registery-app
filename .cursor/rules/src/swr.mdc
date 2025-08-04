@@ -1,0 +1,50 @@
+---
+description: Guidelines for SWR data fetching
+globs: 
+alwaysApply: false
+---
+
+# SWR Best Practices
+
+- Use stable keys — avoid dynamic strings that change on every render:
+
+    ```ts
+    useSWR(`/api/user/${id}`, fetcher)
+    ````
+
+- Create a shared fetcher:
+
+    ```ts
+    export const fetcher = (url: string) => fetch(url).then(res => res.json())
+    ```
+
+- Avoid useEffect + fetch patterns — SWR replaces them completely.
+
+- Handle errors:
+
+    ```ts
+    if (error) return <ErrorUI />
+    ```
+    
+- Use fallbackData and useSWRImmutable() for static or default content.
+ 
+- Update data optimistically with mutate():
+
+    ```ts
+    mutate(key, updatedData, false)
+    ````
+
+- Abstract fetch logic into hooks (e.g. useUser()).
+
+## ⚠️ Pitfalls to avoid
+
+❌ Unstable keys (functions or objects).
+
+❌ Forgetting error boundaries or fallback states.
+
+❌ Redundant manual fetching with useEffect.
+
+---
+
+Use SWR for declarative data fetching and caching in our React + Vite frontend.
+Ensure keys are stable, fallbacks are used, and caching behavior is intentional.
