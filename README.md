@@ -6,7 +6,7 @@ A modern web application for tracking and managing your LEGO sets. Built with Re
 
 - **Dynamic Form**: Add LEGO sets with type-specific details (Plants, Vehicles, Buildings)
 - **Real-time Database**: Store data in Supabase with proper validation
-- **Modern UI**: Beautiful Material-UI interface with responsive design
+- **Modern UI**: Material-UI interface with responsive design
 - **Type Safety**: Full TypeScript support with Zod validation
 - **Testing**: Comprehensive test suite with React Testing Library
 
@@ -146,15 +146,3 @@ Run tests with:
 ```bash
 deno task test
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
