@@ -8,7 +8,9 @@
     "test:watch": "deno run -A --node-modules-dir npm:vitest --watch --reporter=verbose",
     "test:debug": "deno run -A --node-modules-dir npm:vitest --run --reporter=verbose",
     "test:ui": "deno run -A --node-modules-dir npm:vitest --ui",
-    "test:coverage": "deno run -A --node-modules-dir npm:vitest --coverage"
+    "test:coverage": "deno run -A --node-modules-dir npm:vitest --coverage",
+    "cosmos": "deno run -A --node-modules-dir npm:react-cosmos@7.0.0-canary.f624342.0+f624342/cosmos",
+    "cosmos:export": "deno run -A --node-modules-dir npm:react-cosmos@7.0.0-canary.f624342.0+f624342/cosmos-export --export-dir dist/cosmos"
   },
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -35,6 +37,8 @@
     "@testing-library/react": "npm:@testing-library/react@^16.1.0",
     "@testing-library/user-event": "npm:@testing-library/user-event@^14.5.2",
     "@testing-library/jest-dom": "npm:@testing-library/jest-dom@^6.6.3",
-    "swr": "npm:swr@^2.2.5"
+    "swr": "npm:swr@^2.2.5",
+    "react-cosmos": "npm:react-cosmos@^7.0.0-canary.f624342.0",
+    "react-cosmos-plugin-vite": "npm:react-cosmos-plugin-vite@^7.0.0-canary.f624342.0"
   }
 }
