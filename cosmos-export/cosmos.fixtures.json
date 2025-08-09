@@ -1,0 +1,35 @@
+{
+  "rendererUrl": "renderer.html",
+  "fixtures": [
+    {
+      "filePath": "src/components/__fixtures__/LegoButton.fixture.tsx",
+      "cleanPath": [
+        "src",
+        "components",
+        "__fixtures__",
+        "LegoButton.fixture"
+      ],
+      "rendererUrl": "renderer.html?fixtureId=%7B%22path%22%3A%22src%2Fcomponents%2F__fixtures__%2FLegoButton.fixture.tsx%22%7D&locked=true"
+    },
+    {
+      "filePath": "src/components/__fixtures__/LegoCard.fixture.tsx",
+      "cleanPath": [
+        "src",
+        "components",
+        "__fixtures__",
+        "LegoCard.fixture"
+      ],
+      "rendererUrl": "renderer.html?fixtureId=%7B%22path%22%3A%22src%2Fcomponents%2F__fixtures__%2FLegoCard.fixture.tsx%22%7D&locked=true"
+    },
+    {
+      "filePath": "src/components/__fixtures__/LegoHeader.fixture.tsx",
+      "cleanPath": [
+        "src",
+        "components",
+        "__fixtures__",
+        "LegoHeader.fixture"
+      ],
+      "rendererUrl": "renderer.html?fixtureId=%7B%22path%22%3A%22src%2Fcomponents%2F__fixtures__%2FLegoHeader.fixture.tsx%22%7D&locked=true"
+    }
+  ]
+}
